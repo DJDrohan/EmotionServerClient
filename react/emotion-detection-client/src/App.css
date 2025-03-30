@@ -1,0 +1,118 @@
+/* Dark Mode Base */
+body {
+  background-color: #1e1e2e;
+  color: #cdd6f4;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Containers & Cards */
+.bg-white {
+  background-color: #282a36 !important;
+  color: #f8f8f2;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Inputs */
+input {
+  background-color: #3b4252 !important;
+  border: 2px solid #6272a4 !important;
+  color: #f8f8f2;
+  padding: 10px !important;
+  border-radius: 6px !important;
+}
+
+input:focus {
+  border-color: #8be9fd;
+  outline: none;
+}
+
+/* Buttons */
+button {
+  padding: 12px 20px;
+  margin-bottom: 30px !important;
+
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  text-align: center;
+}
+
+/* Primary Action Button */
+button.default-button {
+  background-color: #008cff;
+  color: #fff;
+  box-shadow: 0 4px 6px rgba(0, 140, 255, 0.2);
+}
+
+.image-section {
+  /*display: flex;*/
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px;
+}
+
+button.default-button:hover {
+  background-color: #005bb5;
+  transform: scale(1.05);
+}
+
+/* Success Button */
+button.success-button {
+  background-color: #32cd32;
+  color: #fff;
+  box-shadow: 0 4px 6px rgba(50, 205, 50, 0.2);
+}
+
+button.success-button:hover {
+  background-color: #228b22;
+  transform: scale(1.05);
+}
+
+/* Secondary/Disabled Button */
+button.bg-gray-300 {
+  background-color: #44475a;
+  color: #f8f8f2;
+  box-shadow: 0 2px 5px rgba(255, 255, 255, 0.15);
+}
+
+button.bg-gray-300:hover {
+  background-color: #575a6a;
+}
+
+/* Drop Zone */
+.drop-zone {
+  border: 2px dashed #32cd32;
+  background-color: #282a36;
+  color: #f8f8f2;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  transition: background-color 0.3s ease;
+}
+
+
+
+.custom-margin-bottom {
+  margin-bottom: 30px !important;
+}
+
+.bg-white.p-6.rounded-lg.shadow-md {
+  margin-bottom: 30px !important;
+}
+
+
+
+.drop-zone:hover {
+  background-color: #3b4252;
+}
+
+.image-container {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+}
