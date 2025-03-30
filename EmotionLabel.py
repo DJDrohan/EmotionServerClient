@@ -22,7 +22,7 @@ def draw_text_with_border(image, text, position):
     Draws text on an image with a black border around it for better readability.
 
     Arguments:
-        image: The image to draw text on (typically a frame of a video or an image).
+        image: The image to draw text on.
         text: The text (emotion label) to draw.
         position: (x, y) coordinates for where to place the text on the image.
 
