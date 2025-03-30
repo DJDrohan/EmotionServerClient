@@ -25,11 +25,6 @@ def draw_text_with_border(image, text, position):
         image: The image to draw text on (typically a frame of a video or an image).
         text: The text (emotion label) to draw.
         position: (x, y) coordinates for where to place the text on the image.
-        font: The font style to be used for the text.
-        font_scale: The scale (size) of the font.
-        colour: The color of the text (in BGR format).
-        thickness: The thickness of the text lines.
-        face_number: An optional parameter, could be used to specify which face if there are multiple faces (unused in this function).
 
     Returns:
         None: This function modifies the image in place and does not return anything.
