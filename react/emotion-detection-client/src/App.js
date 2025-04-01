@@ -430,7 +430,6 @@ function App(){
           </div>
 
         <div className={`${darkMode ? 'bg-dark-card' : 'bg-white'} p-6 rounded-lg shadow-md image-section`}>
-
           {/* Uploaded Image */}
           <div>
             <h3 className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} text-lg font-semibold mb-3`}>Original Image</h3>
@@ -450,7 +449,6 @@ function App(){
           
 
           <div className={`${darkMode ? 'bg-dark-card' : 'bg-white'} p-6 rounded-lg shadow-md image-section`}>
-            
           {/* Processed Image */}
           <div>
             <h3 className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} text-lg font-semibold mb-3`}>Processed Image</h3>
