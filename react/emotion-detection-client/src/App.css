@@ -1,37 +1,94 @@
-/* Dark Mode Base */
+/* Base Styles */
 body {
-  background-color: #1e1e2e;
-  color: #cdd6f4;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Containers & Cards */
-.bg-white {
-  background-color: #282a36 !important;
+body[data-theme='dark'] {
+  background-color: #1e1e2e;
+  color: #cdd6f4;
+}
+
+body[data-theme='light'] {
+  background-color: #f8f9fa;
+  color: #212529;
+}
+
+/* Dark Mode Classes */
+.bg-dark-main {
+  background-color: #1e1e2e;
+  color: #cdd6f4;
+}
+
+.bg-dark-card {
+  background-color: #282a36;
   color: #f8f8f2;
-  border-radius: 10px !important;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2) !important;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* Inputs */
-input {
-  background-color: #3b4252 !important;
-  border: 2px solid #6272a4 !important;
+.bg-dark-secondary {
+  background-color: #3b4252;
+}
+
+.bg-dark-input {
+  background-color: #3b4252;
+  border: 2px solid #6272a4;
   color: #f8f8f2;
-  padding: 10px !important;
-  border-radius: 6px !important;
 }
 
-input:focus {
-  border-color: #8be9fd;
-  outline: none;
+.bg-dark-button {
+  background-color: #44475a;
 }
 
-/* Buttons */
+.border-dark-border {
+  border-color: #6272a4;
+}
+
+/* Light Mode Classes */
+.bg-light-main {
+  background-color: #f8f9fa;
+  color: #212529;
+}
+
+/* Theme Toggle Button */
+.mode-toggle-btn {
+  padding: 8px 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  text-align: center;
+  margin-bottom: 0 !important;
+}
+
+.dark-mode-btn {
+  background-color: #343a40;
+  color: #f8f9fa;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode-btn:hover {
+  background-color: #495057;
+  transform: scale(1.05);
+}
+
+.light-mode-btn {
+  background-color: #f8f9fa;
+  color: #343a40;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.light-mode-btn:hover {
+  background-color: #e9ecef;
+  transform: scale(1.05);
+}
+
+/* Button Styles */
 button {
   padding: 12px 20px;
   margin-bottom: 30px !important;
-
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -72,19 +129,19 @@ button.success-button:hover {
   transform: scale(1.05);
 }
 
-/* Secondary/Disabled Button */
-button.bg-gray-300 {
+/* Secondary/Disabled Button - Dark Mode */
+body[data-theme='dark'] button.bg-gray-300 {
   background-color: #44475a;
   color: #f8f8f2;
   box-shadow: 0 2px 5px rgba(255, 255, 255, 0.15);
 }
 
-button.bg-gray-300:hover {
+body[data-theme='dark'] button.bg-gray-300:hover {
   background-color: #575a6a;
 }
 
-/* Drop Zone */
-.drop-zone {
+/* Drop Zone - Dark Mode */
+body[data-theme='dark'] .drop-zone {
   border: 2px dashed #32cd32;
   background-color: #282a36;
   color: #f8f8f2;
@@ -94,25 +151,25 @@ button.bg-gray-300:hover {
   transition: background-color 0.3s ease;
 }
 
-
+body[data-theme='dark'] .drop-zone:hover {
+  background-color: #3b4252;
+}
 
 .custom-margin-bottom {
   margin-bottom: 30px !important;
 }
 
-.bg-white.p-6.rounded-lg.shadow-md {
+.bg-white.p-6.rounded-lg.shadow-md, 
+.bg-dark-card.p-6.rounded-lg.shadow-md {
   margin-bottom: 30px !important;
-}
-
-
-
-.drop-zone:hover {
-  background-color: #3b4252;
 }
 
 .image-container {
   width: auto;
   height: auto;
-  max-width: 100%;
-  max-height: 100%;
+  max-width: 480px;
+  max-height: 480px;
+  object-fit: contain; 
 }
+
+

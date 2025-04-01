@@ -17,8 +17,22 @@ function App(){
   const [isLoading, setIsLoading] = useState(false);
   const [detectedEmotion, setDetectedEmotion] = useState("");
   const [processStatus, setProcessStatus] = useState("");
+  const [darkMode, setDarkMode] = useState(true);
   const statusRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  const emotionIcon = {
+    happy: "😊",
+    sad: "😢",
+    angry: "😡",
+    surprise: "😮",
+    neutral: "😐"
+   }
+
+  // Toggle dark/light mode
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
 
   // Handle dragging file over 
   const handleDragOver = (event) => {
@@ -26,7 +40,7 @@ function App(){
     event.stopPropagation();
     console.log('Drag over');
     if (!isLoading) {
-      event.target.classList.add('bg-gray-100');
+      event.target.classList.add(darkMode ? 'bg-dark-secondary' : 'bg-gray-100');
     }
   };
 
@@ -35,14 +49,14 @@ function App(){
     event.preventDefault();
     event.stopPropagation();
     console.log('Drag leave');
-    event.target.classList.remove('bg-gray-100');
+    event.target.classList.remove(darkMode ? 'bg-dark-secondary' : 'bg-gray-100');
   };
 
   // Handle file drop event
   const handleDrop = (event) => {
     event.preventDefault();
     event.stopPropagation();
-    event.target.classList.remove('bg-gray-100');
+    event.target.classList.remove(darkMode ? 'bg-dark-secondary' : 'bg-gray-100');
 
     console.log('Dropped file');
     const file = event.dataTransfer.files[0];
@@ -93,10 +107,16 @@ function App(){
         updateStatus(`Server verification failed: ${response.data?.message || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error("Server verification error:", error);
-      setServerVerified(false);
-      updateStatus(`Error verifying server: ${error.message}`);
-    } finally {
+      console.error("Error verifying server:", error);
+      if (error.code === 'ECONNABORTED') {
+        updateStatus('Server connection timed out. Please try again later.');
+      } else if (error.response) {
+        updateStatus(`Server error: ${error.response.status} - ${error.response.statusText}`);
+      } else {
+        updateStatus('Network error. Please check your connection.');
+      }
+    }
+    finally {
       setIsLoading(false);
     }
   };
@@ -144,24 +164,21 @@ function App(){
     }
   };
 
-  // Handle file selection
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    if (file) {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (file && allowedTypes.includes(file.type)) {
       setSelectedFile(file);
-  
-      //using readAsDataURL as Depending on image size btoa and atob would need a for loop to go through the array buffer.
-
       const reader = new FileReader();
-      reader.readAsDataURL(file); // Converts image to Base64
+      reader.readAsDataURL(file);
       reader.onload = (e) => {
-        const base64Image = e.target.result.split(',')[1]; // Extract Base64 part
-        console.log("Base64 Encoded Image:", base64Image);
-        setPreviewImage(e.target.result); // Show preview image
-        setProcessedImage(null);//reset processed image section
+        setPreviewImage(e.target.result);
       };
+    } else {
+      updateStatus('Invalid file type! Please upload a valid image (JPEG, PNG)');
     }
   };
+  
   
   // Process the selected image=
   const processImage = async () => {
@@ -233,11 +250,11 @@ function App(){
 
   // Clear Data
   const clearData = () => {
-    setSelectedFile(null);// Clear Selected File
-    setPreviewImage(null); // Clear Image Preview
-    setProcessedImage(null); // Clear Processed Image display
-    setDetectedEmotion(""); // Clear the detected emotion
-    setProcessStatus(""); // Clear the process status
+    setSelectedFile(null);
+    setPreviewImage(null);
+    setProcessedImage(null);
+    setDetectedEmotion("");
+    setProcessStatus("");
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -248,34 +265,50 @@ function App(){
 
     clearStatus(); // Call the clearStatus function on page load
 
+    updateStatus("This application and the Emotion Server does not store client data. The server only processes the image temporarily for emotion detection and sends the results back.");
+
     updateStatus("Application started. Please verify server connection.");
+
+    document.body.setAttribute('data-theme', darkMode ? 'dark' : 'light');
     
-  }, []);
+  }, [darkMode]);
 
   return (
-<div className="min-h-screen bg-[#1e1e2e] py-4">
+<div className={`min-h-screen ${darkMode ? 'bg-dark-main' : 'bg-light-main'} py-4`}>
   <div className="w-full max-w-[900px] mx-auto px-4">
     <div className="container mx-auto max-w-full">
-      <h1 className="text-3xl font-bold  text-center text-white">Emotion Detection Client</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className={`text-3xl font-bold text-center ${darkMode ? 'text-white' : 'text-gray-800'}`}>Emotion Detection Client</h1>
+        
+        {/* Dark/Light Mode Toggle */}
+        <button 
+          onClick={toggleDarkMode} 
+          className={`mode-toggle-btn ${darkMode ? 'light-mode-btn' : 'dark-mode-btn'}`}
+        >
+          {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
+        </button>
+      </div>
 
         {/* Status Section */}
         <div className="">
-        <div className="bg-white p-6 rounded-lg shadow-md" >
+        <div className={`${darkMode ? 'bg-dark-card' : 'bg-white'} p-6 rounded-lg shadow-md`} >
           <div className="flex justify-between items-center mb-2">
-            <h2 className="text-xl font-semibold">Status Log</h2>
+            <h2 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Status Log</h2>
             <button
               onClick={clearStatus}
-              className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+              className={`px-3 py-1 ${darkMode ? 'bg-dark-button text-gray-300' : 'bg-gray-200 text-gray-700'} rounded hover:bg-gray-300`}
             >
               Clear Status
             </button>
           </div>
           <div
-            ref={statusRef}
-            className="px-3 py-2 border rounded bg-gray-50 h-40 overflow-auto font-mono text-sm"
+              ref={statusRef}
+              className="px-3 py-2 border rounded bg-gray-50 h-40 overflow-auto font-mono text-sm"
+              aria-live="polite"
           >
+
             {statusMessages.length === 0 ? (
-              <p className="text-gray-500">Status messages will appear here</p>
+              <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Status messages will appear here</p>
             ) : (
               statusMessages.map((msg, index) => (
                 <div key={index}>{msg}</div>
@@ -286,17 +319,17 @@ function App(){
         </div>
 
         {/* Server Connection Section */}
-        <div className="bg-white p-6 rounded-lg shadow-md ">
-          <h2 className="text-xl font-semibold">Server Connection</h2>
+        <div className={`${darkMode ? 'bg-dark-card' : 'bg-white'} p-6 rounded-lg shadow-md`}>
+          <h2 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Server Connection</h2>
           
           <div>
-            <label className="block text-gray-700 mb-2">Server IP Address:</label>
+            <label className={`block ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>Server IP Address:</label>
             <div className="flex gap-2">
               <input
                 type="text"
                 value={serverIP}
                 onChange={(e) => setServerIP(e.target.value)}
-                className="flex-grow px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`flex-grow px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? 'bg-dark-input border-dark-border text-white' : ''}`}
                 disabled={isLoading}
               />
               <button
@@ -309,19 +342,20 @@ function App(){
                 disabled={isLoading}
               >
                 {isLoading && serverVerified === false ? 'Verifying...' : serverVerified ? 'Verified' : 'Verify Server'}
+                
               </button>
             </div>
           </div>
 
           {/* Password Verification */}
           <div>
-            <label className="block text-gray-700 mb-2">Server Password:</label>
+            <label className={`block ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>Server Password:</label>
             <div className="flex gap-2">
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="flex-grow px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`flex-grow px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? 'bg-dark-input border-dark-border text-white' : ''}`}
                 disabled={isLoading || !serverVerified}
               />
               
@@ -341,38 +375,41 @@ function App(){
         </div>
 
         {/* Image Upload Section */}
-        <div className="bg-white p-6 rounded-lg shadow-md ">
+        <div className={`${darkMode ? 'bg-dark-card' : 'bg-white'} p-6 rounded-lg shadow-md`}>
           
-          <h2 className="text-xl font-semibold ">Image Processing</h2>
+          <h2 className={`text-xl font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`}>Image Processing</h2>
           
           <div>
-            <label className="block text-gray-700 mb-2">Upload Image Password Required</label>
+            <label className={`block ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>Upload Image Password Required</label>
 
             {/*File Drop Zone */}
             <div
-              className="drop-zone flex justify-center items-center border-4 border-dashed border-gray-400 p-8  bg-gray-100 rounded-lg hover:bg-gray-200"
+              className={`drop-zone flex justify-center items-center border-4 border-dashed ${darkMode ? 'border-green-400 bg-dark-secondary' : 'border-gray-400 bg-gray-100'} p-8 rounded-lg hover:bg-gray-200`}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
             >
-              <p className="text-gray-600">Drag & drop your image here, or click to select</p>
+              <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Drag & drop your image here</p>
             </div>
+            
+            
             {/* Normal File uploader */}
 
-            <div className="flex gap-2 ">
+            <div className="flex gap-2 border-t mt-4 pt-4">
               <input
                 type="file"
                 ref={fileInputRef}
                 onChange={handleFileChange}
                 accept="image/*"
-                className="flex-grow px-3 py-2 border rounded"
+                className={`flex-grow px-3 py-2 border rounded ${darkMode ? 'bg-dark-input border-dark-border text-white' : ''}`}
                 disabled={isLoading || !passwordVerified}
               />
+            
 
               {/*Clear Data*/}
               <button
                 onClick={clearData}
-                className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 disabled:opacity-50"
+                className={`${darkMode ? 'bg-dark-button text-gray-300' : 'bg-gray-300 text-gray-700'} px-4 py-2 rounded hover:bg-gray-400 disabled:opacity-50`}
                 disabled={isLoading || !selectedFile}
               >
                 Clear
@@ -392,11 +429,12 @@ function App(){
           </div>
           </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-md image-section ">
+        <div className={`${darkMode ? 'bg-dark-card' : 'bg-white'} p-6 rounded-lg shadow-md image-section`}>
+
           {/* Uploaded Image */}
           <div>
-            <h3 className="text-gray-700 text-lg font-semibold mb-3">Original Image</h3>
-            <div className="p-4 bg-gray-50 h-64 flex items-center justify-center overflow-hidden">
+            <h3 className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} text-lg font-semibold mb-3`}>Original Image</h3>
+            <div className={`p-4 ${darkMode ? 'bg-dark-secondary' : 'bg-gray-50'} h-64 flex items-center justify-center overflow-hidden`}>
               {previewImage ? (
                 <img
                   src={previewImage}
@@ -404,18 +442,19 @@ function App(){
                   className="object-contain max-w-full max-h-full image-container"
                 />
               ) : (
-                <p className="text-gray-500">Upload an image to see preview</p>
+                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Upload an image to see preview</p>
               )}
             </div>
           </div>
           </div>
           
 
-          <div className="bg-white p-6 rounded-lg shadow-md image-container ">
+          <div className={`${darkMode ? 'bg-dark-card' : 'bg-white'} p-6 rounded-lg shadow-md image-section`}>
+            
           {/* Processed Image */}
           <div>
-            <h3 className="text-gray-700 text-lg font-semibold mb-3">Processed Image</h3>
-            <div className="p-4 bg-gray-50 h-64 flex items-center justify-center overflow-hidden">
+            <h3 className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} text-lg font-semibold mb-3`}>Processed Image</h3>
+            <div className={`p-4 ${darkMode ? 'bg-dark-secondary' : 'bg-gray-50'} h-64 flex items-center justify-center overflow-hidden`}>
               {processedImage ? (
                 <img
                   src={`data:image/jpeg;base64,${processedImage}`}
@@ -423,13 +462,16 @@ function App(){
                   className="object-contain max-w-full max-h-full image-container"
                 />
               ) : (
-                <p className="text-gray-500">Processed image will appear here</p>
+                <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>Processed image will appear here</p>
               )}
             </div>
           </div>
 
             {/*Highest Emotion Detected */}
-            <p className="text-2xl font-bold text-blue-600 mt-2">{detectedEmotion || "[Emotion Here]"}</p>
+            <p className="text-2xl font-bold text-blue-600 mt-2">{detectedEmotion ? `${detectedEmotion.charAt(0).toUpperCase() + 
+            detectedEmotion.slice(1)} - 
+            ${emotionIcon[detectedEmotion.toLowerCase()] || "🤷‍♂️"}` 
+            : "[Emotion Here]"}</p>
             <p className="text-2xl font-bold text-blue-600 mt-2">{processStatus || "[Processing Status Here]"}</p>
           </div>
          </div>
