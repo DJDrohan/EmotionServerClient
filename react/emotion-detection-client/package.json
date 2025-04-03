@@ -1,9 +1,11 @@
 {
   "name": "emotion-detection-client",
   "version": "0.1.0",
+  "description": "Client application for emotion detection",
+  "author": "DJ Drohan",
   "private": true,
+  "homepage": "./",
   "dependencies": {
-    "16": "^0.0.2",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
@@ -12,19 +14,47 @@
     "bootstrap": "^5.3.3",
     "daisyui": "^5.0.0",
     "public-ip": "^7.0.1",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-dropzone": "^14.3.8",
     "react-router-dom": "^7.2.0",
     "react-scripts": "^5.0.1",
     "styled-components": "^6.1.16",
+    "tree-kill": "^1.2.2",
+    "wait-on": "^8.0.3",
     "web-vitals": "^2.1.4"
   },
+  "main": "build/electron.js",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "cross-env NODE_ENV=development concurrently \"npm run react-start\" \"npm run electron-start\"",
+    "react-start": "react-scripts start",
+    "electron-start": "wait-on http://localhost:3000 && electron .",
+    "test": "jest",
+    "build": "react-scripts build && npm run copy-electron",
+    "electron-build": "electron-builder --win",
+    "package": "npm run build && npm run electron-build",
+    "make-installer": "electron-builder --win",
+    "copy-electron": "copyfiles -f public/electron.js build/"
+  },
+  "build": {
+    "appId": "com.emotion.client",
+    "productName": "Emotion Detection Client",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "buildResources": "public",
+      "output": "dist"
+    },
+    "win": {
+      "target": "dir",
+      "icon": null
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   },
   "eslintConfig": {
     "extends": [
@@ -46,6 +76,11 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
+    "concurrently": "^9.1.2",
+    "copyfiles": "^2.4.1",
+    "cross-env": "^7.0.3",
+    "electron": "^35.1.2",
+    "electron-builder": "^26.0.12",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.0.17"
   }

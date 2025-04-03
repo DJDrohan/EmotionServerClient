@@ -1,4 +1,6 @@
+import os
 import socket
+import sys
 import time
 
 import base64
@@ -6,7 +8,7 @@ import base64
 
 from flask import Flask, request, jsonify, render_template
 import threading
-import logging
+#import logging
 import cv2
 import numpy as np
 import torch
@@ -15,7 +17,6 @@ from torchvision import transforms
 
 
 from model import CNNModel  # Custom CNN Model
-from data_loader import train_dataset  # Custom DataLoader
 from resize_image import resize_and_pad  # Custom image resize utility
 from hash_utils import hash_data, generate_password_hash  # Custom hashing utilities
 from EmotionLabel import draw_text_with_border  # Custom label drawer
@@ -31,9 +32,10 @@ SERVER_HASH = None
 face_cascade = None
 transform = None
 emotion_mapping = None
+server_active = False
 
 # Logging setup
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+#logging.basicConfig(level=print, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 """
@@ -63,14 +65,23 @@ def load_model():
 
     try:
 
-        model_path = "models/67e 76p/best_emotion_cnn.pth"
+        # Get the base directory where the executable or script is running
+        if getattr(sys, 'frozen', False):  # Check if running as a PyInstaller executable
+            base_dir = sys._MEIPASS  # This is where PyInstaller extracts files when bundled
+        else:
+            base_dir = os.path.dirname(os.path.abspath(__file__))  # Running as a script
+
+        # Set the model path relative to the base directory
+        model_path = os.path.join(base_dir, 'models', '67e 76p', 'best_emotion_cnn.pth')
+
+        #model_path = "_internal/models/67e 76p/best_emotion_cnn.pth"
 
         # Load model
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        logging.info(f"Using device: {device}")
+        print(f"Using device: {device}")
 
-        #dictates how many emotions model will try to detect based on folder structure of test set
-        num_classes = len(train_dataset.classes)
+        emotion_mapping = ["Angry", "Happy", "Neutral", "Sad", "Surprised"]  # Alphabetical Order
+        num_classes = len(emotion_mapping)
         #tell model to use said emotions
         model = CNNModel(num_classes)
 
@@ -94,20 +105,17 @@ def load_model():
             transforms.ToTensor()
         ])
 
-        # Set emotion mapping
-        emotion_mapping = train_dataset.classes
-
-        logging.info("Model loaded successfully on startup")
+        print("Model loaded successfully on startup")
         return True
     except Exception as e:
-        logging.error(f"Error loading model on startup: {e}")
+        print(f"Error loading model on startup: {e}")
         return False
 
 
 @app.route('/start-server', methods=['POST'])
 def start_server():
     """Endpoint to start the server."""
-    global SERVER_SALT, SERVER_HASH
+    global SERVER_SALT, SERVER_HASH,server_active
 
     try:
         password = request.form.get('password')
@@ -118,13 +126,14 @@ def start_server():
 
         # Generate password hash
         SERVER_SALT, SERVER_HASH = generate_password_hash(password)
-        logging.info("Password hash generated")
+        print("Password hash generated")
+        server_active = True
 
         return jsonify({
             "status": "success",
             "message": "Server started successfully!"})
     except Exception as e:
-        logging.error(f"Error starting server: {e}")
+        print(f"Error starting server: {e}")
         return jsonify({
             "status": "error",
             "message": str(e)}), 500
@@ -133,39 +142,20 @@ def start_server():
 @app.route('/stop-server', methods=['POST'])
 def stop_server():
     """Endpoint to stop the server."""
+    global server_active
+    server_active = False
     return jsonify({"status": "success",
                     "message": "Server stopped successfully!"})
 
+@app.route('/check-status', methods=['GET'])
+def check_status():
+    if server_active:
+        return jsonify({"status": "OK",
+                        "message": "Server is up and running!"}), 200
+    else:
+        return jsonify({"status": "error",
+                        "message": "Server is not active."}), 503
 
-@app.route('/verify-address', methods=['POST'])
-def verify_address():
-    """Verify if the server is reachable."""
-    try:
-        data = request.get_json()
-        if not data or 'server_ip' not in data:
-            return jsonify({
-                "status": "error",
-                "message": "Missing server_ip"}), 400
-
-        server_ip = data['server_ip']
-        port = 5000
-
-        # Test connection
-        try:
-            with socket.create_connection((server_ip, port), timeout=3):
-                return jsonify({
-                    "status": "success",
-                    "message": "Server is reachable"}), 200
-
-        except (socket.timeout, ConnectionRefusedError):
-            return jsonify({
-                "status": "error",
-                "message": "Server is unreachable"}), 502
-
-    except Exception as e:
-        return jsonify({
-            "status": "error",
-            "message": str(e)}), 500
 
 @app.route('/verify-password', methods=['POST'])
 def verify_password():
@@ -292,14 +282,18 @@ def process_image():
         })
 
     except Exception as e:
-        logging.error(f"Error processing image: {e}")
+        print(f"Error processing image: {e}")
         return jsonify({
             "status": "error",
             "message": f"Server error: {str(e)}"}), 500
 
 def run_flask():
     """Run the Flask app."""
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    try:
+        print("Starting Flask server on port 5000...")
+        app.run(host='0.0.0.0', port=5000, debug=True, threaded=True, use_reloader=False)
+    except Exception as e:
+        print(f"Flask server failed to start: {str(e)}")
 
 
 def main():
@@ -307,19 +301,21 @@ def main():
 
     """First Load Emotion Detection Model """
     if load_model():
-        logging.info("Model loaded successfully")
+        print("Model loaded successfully")
     else:
-        logging.error("Failed to initialize model - server will start but model functions may not work")
+        print("Failed to initialize model - server will start but model functions may not work")
 
+    print("Flask Server Thread Started")
     server_thread = threading.Thread(target=run_flask, daemon=True)
     server_thread.start()
-    logging.info("Flask server is running...")
+    print("Flask server is running...")
     # Keep the main thread alive
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        logging.info("Shutting down Flask server.")
+        print("Shutting down Flask server.")
 
 if __name__ == "__main__":
+    print("Starting App")
     main()

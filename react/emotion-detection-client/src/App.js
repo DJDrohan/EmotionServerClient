@@ -83,43 +83,46 @@ function App(){
   const verifyServer = async () => {
     updateStatus(`Attempting to verify server at ${serverIP}...`);
     setIsLoading(true);
-    
+  
     try {
-      const formData = new FormData();
-      formData.append('server_ip', serverIP);
-      
-      // Send request directly to the target server
-      const response = await axios.post(`http://${serverIP}:5000/verify-address`, 
-        { server_ip: serverIP },
-        {
-          headers: { 'Content-Type': 'application/json' },
-          timeout: 15000 // 15 second timeout
+      const response = await axios.get(`http://${serverIP}:5000/check-status`, { timeout: 5000 });
+  
+      // If the server is up and running
+      if (response.status === 200) {
+        if (response.data.status === 'OK') {
+          setServerVerified(true);
+          updateStatus('Server is up and running!');
+        } else {
+          // If status is not 'OK', display the server-provided message
+          setServerVerified(false);
+          updateStatus(`Server error: ${response.data.message}`);
         }
-      );
-
-      console.log("Server verification response:", response.data);
-
-      if (response.data && response.data.status === 'success') {
-        setServerVerified(true);
-        updateStatus('Server verified successfully');
-      } else {
-        setServerVerified(false);
-        updateStatus(`Server verification failed: ${response.data?.message || 'Unknown error'}`);
       }
     } catch (error) {
-      console.error("Error verifying server:", error);
-      if (error.code === 'ECONNABORTED') {
-        updateStatus('Server connection timed out. Please try again later.');
-      } else if (error.response) {
-        updateStatus(`Server error: ${error.response.status} - ${error.response.statusText}`);
+      // If the error is a server-side issue, display the error as is
+      setServerVerified(false);
+      
+      if (error.response) {
+        // 503 Service Unavailable or other error codes
+        if (error.response.status === 503) {
+          updateStatus(`Server error: ${error.response.data.message}`);
+        } else {
+          updateStatus(`Server error: ${error.response.status} - ${error.response.statusText}`);
+        }
+      } else if (error.request) {
+        // No response from server (network error, unreachable, etc.)
+        updateStatus('Unable to connect to the server. Please check the IP address or network connection.');
       } else {
-        updateStatus('Network error. Please check your connection.');
+        // Unexpected errors
+        updateStatus(`Unexpected error: ${error.message}`);
       }
-    }
-    finally {
+    } finally {
       setIsLoading(false);
     }
   };
+  
+  
+  
 
   // Verify password
   const verifyPassword = async () => {
@@ -466,10 +469,13 @@ function App(){
           </div>
 
             {/*Highest Emotion Detected */}
-            <p className="text-2xl font-bold text-blue-600 mt-2">{detectedEmotion ? `${detectedEmotion.charAt(0).toUpperCase() + 
-            detectedEmotion.slice(1)} - 
-            ${emotionIcon[detectedEmotion.toLowerCase()] || "🤷‍♂️"}` 
-            : "[Emotion Here]"}</p>
+            <p className="text-2xl font-bold text-blue-600 mt-2">
+            {detectedEmotion
+            ? detectedEmotion.split(', ').map(emotion => 
+              `${emotion.charAt(0).toUpperCase() + emotion.slice(1)} ${emotionIcon[emotion.toLowerCase()] || '🤷‍♂️'}`
+            ).join(', ')
+            : "[Emotion Here]"}
+            </p>
             <p className="text-2xl font-bold text-blue-600 mt-2">{processStatus || "[Processing Status Here]"}</p>
           </div>
          </div>
