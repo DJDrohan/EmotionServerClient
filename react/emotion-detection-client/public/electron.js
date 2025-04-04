@@ -7,10 +7,8 @@ const waitOn = require('wait-on');
 let mainWindow;
 let reactProcess = null;
 
-// Add this logging function to help debug
 function logMessage(message) {
   console.log(`[ELECTRON] ${message}`);
-  // You could also write to a log file if needed
 }
 
 function startReactServer() {
@@ -49,7 +47,6 @@ async function createWindow() {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      // Add this to see console.logs from the renderer process in the terminal
       devTools: false
     },
   });

@@ -2,6 +2,9 @@ from PyInstaller.utils.hooks import collect_submodules, collect_data_files
 import torch
 import cv2
 
+import PyInstaller.config
+PyInstaller.config.CONF['excludedimports'] = ['tensorflow', 'tensorflow.keras']
+
 # Collect necessary submodules from libraries
 hiddenimports = collect_submodules('torch') + collect_submodules('flask') + collect_submodules('cv2') + [
     'model',        # Custom script for the CNN model
@@ -23,7 +26,7 @@ a = Analysis(
     hiddenimports=hiddenimports,  # Include hidden imports
     hookspath=[],
     runtime_hooks=[], 
-    excludes=[],
+    excludes=['tensorflow', 'tensorflow.keras'],
     noarchive=False  # Disable archive mode
 )
 
