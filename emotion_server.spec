@@ -6,7 +6,7 @@ import PyInstaller.config
 PyInstaller.config.CONF['excludedimports'] = ['tensorflow', 'tensorflow.keras']
 
 # Collect necessary submodules from libraries
-hiddenimports = collect_submodules('torch') + collect_submodules('flask') + collect_submodules('cv2') + [
+hiddenimports =collect_submodules('waitress') + collect_submodules('torch') + collect_submodules('flask') + collect_submodules('cv2') +  [
     'model',        # Custom script for the CNN model
     'resize_image', # Custom image resizing utility
     'hash_utils',   # Custom hashing utilities

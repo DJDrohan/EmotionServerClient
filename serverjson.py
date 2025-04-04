@@ -12,8 +12,10 @@ import threading
 import cv2
 import numpy as np
 import torch
+
 from flask_cors import CORS
 from torchvision import transforms
+from waitress import serve
 
 
 from model import CNNModel  # Custom CNN Model
@@ -86,7 +88,7 @@ def load_model():
         model = CNNModel(num_classes)
 
         #model load state dictionary with given model and location of device
-        model.load_state_dict(torch.load(model_path, map_location=device))
+        model.load_state_dict(torch.load(model_path, map_location=device, weights_only=True))
 
         #model set to evaluation mode
         model.eval()
@@ -105,7 +107,6 @@ def load_model():
             transforms.ToTensor()
         ])
 
-        print("Model loaded successfully on startup")
         return True
     except Exception as e:
         print(f"Error loading model on startup: {e}")
@@ -288,12 +289,23 @@ def process_image():
             "message": f"Server error: {str(e)}"}), 500
 
 def run_flask():
-    """Run the Flask app."""
+    """Run the Flask app using Waitress on Windows."""
     try:
         print("Starting Flask server on port 5000...")
-        app.run(host='0.0.0.0', port=5000, debug=True, threaded=True, use_reloader=False)
+        # Use waitress to serve the Flask app
+        serve(app, host='0.0.0.0', port=5000)
     except Exception as e:
         print(f"Flask server failed to start: {str(e)}")
+
+def get_ip_address():
+    """Get the local IP address of the machine."""
+    try:
+        hostname = socket.gethostname()
+        ip_address = socket.gethostbyname(hostname)
+        return ip_address
+    except Exception as e:
+        print(f"Error getting IP address: {e}")
+        return "localhost"
 
 
 def main():
@@ -305,10 +317,14 @@ def main():
     else:
         print("Failed to initialize model - server will start but model functions may not work")
 
-    print("Flask Server Thread Started")
+    print("Server Thread Started")
     server_thread = threading.Thread(target=run_flask, daemon=True)
     server_thread.start()
-    print("Flask server is running...")
+    ip_address = get_ip_address()  # Get the IP address of the machine
+
+    print(f"Server Active 127.0.0.0:5000...")
+    print(f"Server Active {ip_address}:5000...")
+    print(f"Use Address: {ip_address} For Client Connection")
     # Keep the main thread alive
     try:
         while True:
