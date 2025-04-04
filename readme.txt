@@ -1,3 +1,55 @@
+"Production Mode"
+
+Unzip Production_Apps
+
+
+In server folder
+
+Run Emotion_Server.exe
+
+Wait for Server Terminal to load
+
+(may take a bit to initialise)
+
+Open port 5000 of the machines ip to access server front end when prompted either by search bar or ctrl clicking links on terminal
+
+
+In client folder
+
+run Emotion Detection Client.exe
+
+Client App window will open automatically
+
+
+
+
+
+"Making your own production Apps"
+
+
+Client
+
+Open react/emotion-detection-client in command line
+
+npm start build
+
+npm start electron-build
+
+go to dist/win_unpacked after completion
+
+run emotion detection client
+
+
+Server
+
+Run pyinstaller ./emotion_server.spec
+
+go to dist directory after completion
+
+run Emotion_Server
+
+"Dev Mode"
+
 unzip shortened Kaggle emotion dataset AHNSS
 
 use npm install when in react/emotion-detection-client.

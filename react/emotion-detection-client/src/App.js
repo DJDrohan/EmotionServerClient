@@ -178,6 +178,7 @@ function App(){
         setPreviewImage(e.target.result);
       };
     } else {
+      clearData()
       updateStatus('Invalid file type! Please upload a valid image (JPEG, PNG)');
     }
   };

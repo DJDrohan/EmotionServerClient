@@ -50,7 +50,7 @@ async function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       // Add this to see console.logs from the renderer process in the terminal
-      devTools: true
+      devTools: false
     },
   });
 
