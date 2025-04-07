@@ -4,7 +4,7 @@ import sys
 import time
 
 import base64
-
+import webbrowser
 
 from flask import Flask, request, jsonify, render_template
 import threading
@@ -322,9 +322,11 @@ def main():
     server_thread.start()
     ip_address = get_ip_address()  # Get the IP address of the machine
 
-    print(f"Server Active 127.0.0.0:5000...")
-    print(f"Server Active {ip_address}:5000...")
+    print(f"Server Active on 127.0.0.0:5000...")
+    print(f"Server Active on {ip_address}:5000...")
     print(f"Use Address: {ip_address} For Client Connection")
+    print("Tab Opened On Default Browser")
+    webbrowser.open_new(f"http://{ip_address}:5000")
     # Keep the main thread alive
     try:
         while True:
