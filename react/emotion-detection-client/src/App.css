@@ -165,11 +165,17 @@ body[data-theme='dark'] .drop-zone:hover {
 }
 
 .image-container {
-  width: auto;
-  height: auto;
-  max-width: 480px;
-  max-height: 480px;
-  object-fit: contain; 
+  width: 100%; /* Make it take up full width of its container */
+  max-width: 100%; /* Ensure it doesn't exceed its container's width */
+  height: auto; /* Maintain aspect ratio */
+  max-height: 80vh; /* Limit max height to 80% of viewport height */
+  object-fit: contain; /* Ensure the image is contained inside its box without distortion */
+  margin: 0 auto; /* Center align the image container */
 }
 
-
+/* Ensure image box doesn't break layout in mobile portrait */
+@media (max-width: 768px) {
+  .image-container {
+    max-height: 70vh; /* Adjust the height further for smaller screens */
+  }
+}

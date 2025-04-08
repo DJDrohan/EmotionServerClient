@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import axios from 'axios'; // axios for HTTP requests
-
 
 function App(){
   // State variables
@@ -28,6 +26,7 @@ function App(){
     surprise: "😮",
     neutral: "😐"
    }
+
 
   // Toggle dark/light mode
   const toggleDarkMode = () => {
@@ -85,45 +84,38 @@ function App(){
     setIsLoading(true);
   
     try {
-      const response = await axios.get(`http://${serverIP}:5000/check-status`, { timeout: 5000 });
+      const response = await fetch(`http://${serverIP}:5000/check-status`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+  
+      const data = await response.json();
   
       // If the server is up and running
-      if (response.status === 200) {
-        if (response.data.status === 'OK') {
+      if (response.ok) {
+        if (data.status === 'OK') {
           setServerVerified(true);
           updateStatus('Server is up and running!');
         } else {
           // If status is not 'OK', display the server-provided message
           setServerVerified(false);
-          updateStatus(`Server error: ${response.data.message}`);
+          updateStatus(`Server error: ${data.message}`);
         }
+      } else {
+        setServerVerified(false);
+        updateStatus(`Server error: ${response.status} - ${data.message || 'Unknown error'}`);
       }
     } catch (error) {
-      // If the error is a server-side issue, display the error as is
+      // If there's a network error or other issue
       setServerVerified(false);
-      
-      if (error.response) {
-        // 503 Service Unavailable or other error codes
-        if (error.response.status === 503) {
-          updateStatus(`Server error: ${error.response.data.message}`);
-        } else {
-          updateStatus(`Server error: ${error.response.status} - ${error.response.statusText}`);
-        }
-      } else if (error.request) {
-        // No response from server (network error, unreachable, etc.)
-        updateStatus('Unable to connect to the server. Please check the IP address or network connection.');
-      } else {
-        // Unexpected errors
-        updateStatus(`Unexpected error: ${error.message}`);
-      }
+      updateStatus('Unable to connect to the server. Please check the IP address or network connection.');
     } finally {
       setIsLoading(false);
     }
   };
   
-  
-  
-
   // Verify password
   const verifyPassword = async () => {
     if (!serverVerified) {
@@ -141,22 +133,23 @@ function App(){
     
     try {
       // Send request directly to the target server
-      const response = await axios.post(`http://${serverIP}:5000/verify-password`, 
-        { password: password },
-        {
-          headers: { 'Content-Type': 'application/json' },
-          timeout: 15000 // 15 second timeout
-        }
-      );
+      const response = await fetch(`http://${serverIP}:5000/verify-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ password: password })
+      });
 
-      console.log("Password verification response:", response.data);
+      const data = await response.json();
+      console.log("Password verification response:", data);
 
-      if (response.data && response.data.status === 'success') {
+      if (response.ok && data.status === 'success') {
         setPasswordVerified(true);
         updateStatus('Password verified successfully');
       } else {
         setPasswordVerified(false);
-        updateStatus(`Password verification failed: ${response.data?.message || 'Unknown error'}`);
+        updateStatus(`Password verification failed: ${data?.message || 'Unknown error'}`);
       }
     } catch (error) {
       console.error("Password verification error:", error);
@@ -184,10 +177,9 @@ function App(){
   };
   
   
-  // Process the selected image=
+  // Process the selected image
   const processImage = async () => {
-
-    //checks if server ip and password were confirmed and if a file was uploaded before doing the request
+    // checks if server ip and password were confirmed and if a file was uploaded before doing the request
     if (!serverVerified) {
       alert('Please verify the server first!');
       return;
@@ -210,19 +202,24 @@ function App(){
       const base64Image = reader.result.split(',')[1]; // Extract Base64 part
   
       try {
-        const response = await axios.post(
-          `http://${serverIP}:5000/process-image`,
-          { filename: selectedFile.name, image: base64Image, password }, //Json object for server
-          { headers: { "Content-Type": "application/json" }, timeout: 30000 }
-        );
+        const response = await fetch(`http://${serverIP}:5000/process-image`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 
+            filename: selectedFile.name, 
+            image: base64Image, 
+            password 
+          })
+        });
   
-        const data = response.data;
-  
+        const data = await response.json();
         console.log("Response Data:", data);
   
         if (data.status === "success") {
           if (data.processed_image) {
-            //Take Image from json response object and display line 416 allows for base64 decoding
+            // Take Image from json response object and display
             setProcessedImage(data.processed_image);
             updateStatus(data.message || "Image processed successfully");
             setProcessStatus(`${data.message}`);
@@ -250,8 +247,6 @@ function App(){
     setStatusMessages([]);
   };
 
-
-
   // Clear Data
   const clearData = () => {
     setSelectedFile(null);
@@ -266,7 +261,6 @@ function App(){
 
   // useEffect to have a clean page on initial load. This acts like a "main" function in a python program.
   useEffect(() => {
-
     clearStatus(); // Call the clearStatus function on page load
 
     updateStatus("This application and the Emotion Server does not store client data. The server only processes the image temporarily for emotion detection and sends the results back.");
