@@ -1,6 +1,6 @@
-"Production Mode"
+"Applications"
 
-Unzip Production_Apps
+Unzip Apps
 
 
 In server folder
@@ -14,6 +14,8 @@ Wait for Server Terminal to load
 Open port 5000 of the machines ip to access server front end when prompted either by search bar or ctrl clicking links on terminal
 
 
+
+
 In client folder
 
 run Emotion Detection Client.exe
@@ -21,6 +23,10 @@ run Emotion Detection Client.exe
 Client App window will open automatically
 
 
+
+In Client Android Folder
+
+Load up Android Studio and install APK
 
 
 
