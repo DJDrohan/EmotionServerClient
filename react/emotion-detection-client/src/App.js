@@ -18,6 +18,7 @@ function App(){
   const [darkMode, setDarkMode] = useState(true);
   const statusRef = useRef(null);
   const fileInputRef = useRef(null);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
 
   const emotionIcon = {
     happy: "😊",
@@ -27,6 +28,15 @@ function App(){
     neutral: "😐"
    }
 
+
+
+
+    // Function to detect mobile devices
+  const detectMobileDevice = () => {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent.toLowerCase());
+    setIsMobileDevice(isMobile);
+  };
 
   // Toggle dark/light mode
   const toggleDarkMode = () => {
@@ -47,8 +57,11 @@ function App(){
   const handleDragLeave = (event) => {
     event.preventDefault();
     event.stopPropagation();
-    console.log('Drag leave');
-    event.target.classList.remove(darkMode ? 'bg-dark-secondary' : 'bg-gray-100');
+    
+      // Only allow styling changes if not loading AND password is verified
+     if (!isLoading && passwordVerified) {
+        event.target.classList.add(darkMode ? 'bg-dark-secondary' : 'bg-gray-100');
+  }
   };
 
   // Handle file drop event
@@ -57,10 +70,15 @@ function App(){
     event.stopPropagation();
     event.target.classList.remove(darkMode ? 'bg-dark-secondary' : 'bg-gray-100');
 
-    console.log('Dropped file');
-    const file = event.dataTransfer.files[0];
-    if (file) {
-      handleFileChange({ target: { files: [file] } }); // Use the existing file handling function
+    
+    //only uploads if password is verified
+    if (passwordVerified) {
+      const file = event.dataTransfer.files[0];
+      if (file) {
+        handleFileChange({ target: { files: [file] } });
+      }
+    } else {
+      updateStatus("Please verify password before uploading images");
     }
   };
 
@@ -261,6 +279,9 @@ function App(){
 
   // useEffect to have a clean page on initial load. This acts like a "main" function in a python program.
   useEffect(() => {
+
+    detectMobileDevice();
+
     clearStatus(); // Call the clearStatus function on page load
 
     updateStatus("This application and the Emotion Server does not store client data. The server only processes the image temporarily for emotion detection and sends the results back.");
@@ -380,16 +401,25 @@ function App(){
           <div>
             <label className={`block ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>Upload Image Password Required</label>
 
-            {/*File Drop Zone */}
+            {/* File Drop Zone - only show on non-mobile devices */}
+            {!isMobileDevice && (
             <div
-              className={`drop-zone flex justify-center items-center border-4 border-dashed ${darkMode ? 'border-green-400 bg-dark-secondary' : 'border-gray-400 bg-gray-100'} p-8 rounded-lg hover:bg-gray-200`}
+              className={`drop-zone flex justify-center items-center border-4 border-dashed 
+              ${!passwordVerified ? 'opacity-50 cursor-not-allowed ' : ''}
+              ${darkMode ? 'border-green-400 bg-dark-secondary' : 'border-gray-400 bg-gray-100'} 
+              p-8 rounded-lg ${passwordVerified ? 'hover:bg-gray-200' : ''}`}
+              
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
             >
-              <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>Drag & drop your image here</p>
+                      <p className={`${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+              {passwordVerified 
+                ? 'Drag & drop your image here' 
+                : 'Verify password to enable drag & drop'}
+                </p>
             </div>
-            
+          )}
             
             {/* Normal File uploader */}
 
@@ -399,7 +429,7 @@ function App(){
                 ref={fileInputRef}
                 onChange={handleFileChange}
                 accept="image/*"
-                className={`flex-grow px-3 py-2 border rounded ${darkMode ? 'bg-dark-input border-dark-border text-white' : ''}`}
+                className={`w-full max-w-xs px-3 py-2 border rounded ${darkMode ? 'bg-dark-input border-dark-border text-white' : ''}`}
                 disabled={isLoading || !passwordVerified}
               />
             

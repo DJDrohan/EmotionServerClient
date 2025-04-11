@@ -10,13 +10,13 @@
 <body class="bg-gray-100">
     <div class="container mx-auto px-4 py-8 max-w-2xl">
         <h1 class="text-3xl font-bold mb-8 text-center">Emotion Detection Server</h1>
-        
+
         <!-- Password Setup -->
         <div class="mb-6">
             <label class="block text-gray-700 mb-2">Server Password:</label>
             <input type="password" id="serverPassword" class="w-full px-3 py-2 border rounded">
         </div>
-	
+
         <!-- Server Controls -->
         <div class="flex gap-4 mb-6">
             <button onclick="startServer()" class="flex-1 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
@@ -37,28 +37,60 @@
 
         <!-- Log Display -->
         <div class="mb-6">
-            <label class="block text-gray-700 mb-2">Server Logs:</label>
+            <div class="flex justify-between items-center mb-2">
+                <label class="block text-gray-700">Server Logs:</label>
+                <button onclick="clearServerLogs()" class="bg-gray-300 text-gray-800 px-3 py-1 rounded hover:bg-gray-400 text-sm">
+                    Clear Logs
+                </button>
+            </div>
             <textarea id="logDisplay" class="w-full h-64 px-3 py-2 border rounded bg-white" readonly></textarea>
         </div>
     </div>
 
     <script>
-        function loadModel() {
-            <!--
-            const modelFile = document.getElementById('modelFile').files[0];
-            if (!modelFile) {
-                alert('Please select a model file');
-                return;
+        // Global variable to track if polling should continue
+        let isPolling = false;
+
+        // Function to fetch server logs periodically
+        function startPollingLogs() {
+            if (isPolling) return;
+
+            isPolling = true;
+            fetchLogs();
+
+            // Poll every 2 seconds
+            window.logPollingInterval = setInterval(fetchLogs, 2000);
+        }
+
+        function stopPollingLogs() {
+            isPolling = false;
+            if (window.logPollingInterval) {
+                clearInterval(window.logPollingInterval);
             }
+        }
 
+        function fetchLogs() {
+            fetch('/get-logs')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        updateLogDisplay(data.logs);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching logs:', error);
+                });
+        }
 
-            const formData = new FormData();
-            formData.append('model', modelFile);
-            -->
+        function updateLogDisplay(logs) {
+            const logDisplay = document.getElementById('logDisplay');
+            logDisplay.value = logs.join('\n');
+            logDisplay.scrollTop = logDisplay.scrollHeight;
+        }
 
+        function loadModel() {
             fetch('/load-model', {
                 method: 'POST',
-                <!--body: formData-->
             })
             .then(response => response.json())
             .then(data => {
@@ -89,6 +121,9 @@
                     document.getElementById('serverStatus').textContent = 'Server Running';
                     document.getElementById('serverStatus').classList.remove('text-red-500');
                     document.getElementById('serverStatus').classList.add('text-green-500');
+
+                    // Start polling for logs when server starts
+                    startPollingLogs();
                 }
                 appendLog(data.message);
             })
@@ -107,6 +142,9 @@
                     document.getElementById('serverStatus').textContent = 'Server Not Running';
                     document.getElementById('serverStatus').classList.remove('text-green-500');
                     document.getElementById('serverStatus').classList.add('text-red-500');
+
+                    // Stop polling for logs when server stops
+                    stopPollingLogs();
                 }
                 appendLog(data.message);
             })
@@ -121,6 +159,40 @@
             logDisplay.value += `[${timestamp}] ${message}\n`;
             logDisplay.scrollTop = logDisplay.scrollHeight;
         }
+
+        function clearServerLogs() {
+            // Clear logs on the server
+            fetch('/clear-logs', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Also clear the local display
+                    document.getElementById('logDisplay').value = '';
+                }
+            })
+            .catch(error => {
+                console.error('Error clearing logs:', error);
+            });
+        }
+
+        // Check server status on page load
+        window.addEventListener('load', function() {
+            fetch('/check-status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'OK') {
+                        document.getElementById('serverStatus').textContent = 'Server Running';
+                        document.getElementById('serverStatus').classList.remove('text-red-500');
+                        document.getElementById('serverStatus').classList.add('text-green-500');
+                        startPollingLogs();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking server status:', error);
+                });
+        });
     </script>
 </body>
 </html>

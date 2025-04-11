@@ -179,3 +179,19 @@ body[data-theme='dark'] .drop-zone:hover {
     max-height: 70vh; /* Adjust the height further for smaller screens */
   }
 }
+
+/* Prevent file input from stretching too wide */
+input[type="file"] {
+  width: 100%;
+  max-width: 300px; /* or whatever width works best for your layout */
+  box-sizing: border-box;
+}
+
+/* Fixes for Android Chrome quirks */
+@media screen and (max-width: 768px) {
+  input[type="file"] {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 16px; /* Helps prevent zooming on input tap */
+  }
+}
