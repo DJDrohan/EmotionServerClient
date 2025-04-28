@@ -15,7 +15,7 @@ and prints the accuracy and per-class performance for each emotion.
 """
 
 # Set the path to the saved model file
-MODEL_PATH = "models/67e 76p ANGRY IS THE NEW FEAR/best_emotion_cnn.pth"  # Change this to the path of your saved model file
+MODEL_PATH = "models/67e 76p/best_emotion_cnn.pth"
 
 # Initialize the model
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')  # Use GPU if available, otherwise CPU

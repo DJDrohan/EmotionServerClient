@@ -34,7 +34,7 @@
     "start": "cross-env NODE_ENV=development concurrently \"npm run react-start\" \"npm run electron-start\"",
     "react-start": "react-scripts start",
     "electron-start": "wait-on http://localhost:3000 && electron .",
-    "test": "jest",
+    "test": "react-scripts test",
     "build": "react-scripts build && npm run copy-electron",
     "electron-build": "electron-builder --win",
     "package": "npm run build && npm run electron-build",
@@ -67,6 +67,13 @@
       "react-app/jest"
     ]
   },
+  "jest": {
+  "moduleNameMapper": {
+    "\\.(css|less|scss|sass)$": "<rootDir>/__mocks__/styleMock.js",
+    "\\.(gif|ttf|eot|svg)$": "<rootDir>/__mocks__/fileMock.js"
+  }
+}
+,
   "browserslist": {
     "production": [
       ">0.2%",

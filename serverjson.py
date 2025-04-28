@@ -171,7 +171,6 @@ def check_status():
 def verify_password():
     """Verify the server password."""
     global SERVER_SALT, SERVER_HASH
-
     try:
         client_ip = request.remote_addr
         add_log(f"Password verification attempt from {client_ip}")

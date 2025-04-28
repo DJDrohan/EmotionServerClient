@@ -1,0 +1,109 @@
+1. Using the Production Apps
+Server Setup:
+Unzip the provided apps archive.
+
+Inside the server folder:
+
+Run: Emotion_Server.exe
+
+Wait for the server terminal window to fully initialize (may take a minute).
+
+Once loaded:
+
+Open port 5000 on the machine's private IP.
+
+Access the server frontend:
+
+Either manually enter http://your-ip:5000/
+
+Or Ctrl+Click a link inside the server terminal output.
+
+Client Setup (PC):
+Inside the client folder:
+
+Run: Emotion Detection Client.exe
+
+The client app window will automatically open.
+
+Input:
+
+Server IP (private machine IP)
+
+Server password (set on server frontend)
+
+Upload your image, click Process, and the app will handle everything.
+
+Client Setup (Android):
+Inside the client_android folder:
+
+Open Android Studio.
+
+Install the provided APK to your Android device.
+
+Now the Android app will work the same way — connect to server, upload images, and process.
+
+2. Making Your Own Production Builds
+Client (React/Electron):
+Open command line in the react/emotion-detection-client/ folder.
+
+Run:
+
+npm install
+npm run build
+npm run electron-build
+
+After it finishes:
+
+Go to dist/win-unpacked/
+
+Run Emotion Detection Client.exe inside.
+
+This is your fully production-built Windows app.
+
+Server (Python):
+Run:
+
+pyinstaller ./emotion_server.spec
+After building:
+
+Go to the dist/ directory.
+
+Run Emotion_Server.exe.
+
+ This is your full standalone production server executable.
+
+3. Running in Development Mode
+ Server Dev Setup:
+Unzip the shortened Kaggle emotion dataset (AHNSS).
+
+Navigate to your server code folder.
+
+Run:
+
+
+python serverjson.py
+Open port 5000 on the machine.
+
+Access http://your-ip:5000/ to set password/start server.
+
+Client Dev Setup (React Frontend):
+Open terminal inside react/emotion-detection-client/
+
+Install dependencies:
+
+npm install
+Start development server:
+
+npm start
+This runs the client frontend on port 3000 of your machine.
+
+Connection:
+In the Client App:
+
+Enter your private IP address of the server.
+
+Enter the server password you set.
+
+Upload an image, click Process.
+
+The client talks to the dev server and processes images live.
